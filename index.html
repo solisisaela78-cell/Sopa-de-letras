@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Sopa de Letras - Políticas Educativas</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        font-family: Arial, Helvetica, sans-serif;
+        background: linear-gradient(135deg, #e8f0ff, #f7f9ff);
+        color: #172033;
+        min-height: 100vh;
+    }
+
+    header {
+        background: linear-gradient(135deg, #263b80, #4059a8);
+        color: white;
+        padding: 30px 20px;
+        text-align: center;
+        box-shadow: 0 5px 18px rgba(0,0,0,0.15);
+    }
+
+    header h1 {
+        font-size: 32px;
+        margin-bottom: 10px;
+    }
+
+    header p {
+        font-size: 17px;
+        opacity: 0.95;
+    }
+
+    .contenedor {
+        width: 95%;
+        max-width: 1250px;
+        margin: 25px auto;
+    }
+
+    .info {
+        background: white;
+        border-radius: 18px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    }
+
+    .info h2 {
+        color: #30478e;
+        margin-bottom: 12px;
+    }
+
+    .info h3 {
+        color: #4059a8;
+        margin-top: 20px;
+        margin-bottom: 8px;
+    }
+
+    .info p {
+        line-height: 1.7;
+        text-align: justify;
+        margin-bottom: 10px;
+    }
+
+    .info ul {
+        margin-left: 25px;
+        line-height: 1.8;
+    }
+
+    .juego {
+        display: grid;
+        grid-template-columns: 1fr 350px;
+        gap: 25px;
+        align-items: start;
+    }
+
+    .panel-juego,
+    .panel-palabras {
+        background: white;
+        border-radius: 20px;
+        padding: 25px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    }
+
+    .panel-juego h2,
+    .panel-palabras h2 {
+        color: #30478e;
+        margin-bottom: 18px;
+    }
+
+    #sopa {
+        width: min(90vw, 650px);
+        aspect-ratio: 1 / 1;
+        margin: auto;
+        display: grid;
+        grid-template-columns: repeat(15, 1fr);
+        grid-template-rows: repeat(15, 1fr);
+        border: 3px solid #30478e;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #eef2ff;
+        touch-action: none;
+        user-select: none;
+    }
+
+    .celda {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: 1px solid #ccd3e7;
+        font-weight: bold;
+        font-size: clamp(12px, 2vw, 21px);
+        color: #172033;
+        cursor: pointer;
+        user-select: none;
+        -webkit-user-select: none;
+        transition: transform 0.08s;
+    }
+
+    .celda.seleccionada {
+        transform: scale(0.92);
+    }
+
+    .controles {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 20px;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .controles label {
+        font-weight: bold;
+    }
+
+    #color {
+        width: 55px;
+        height: 40px;
+        border: none;
+        cursor: pointer;
+        background: transparent;
+    }
+
+    button {
+        border: none;
+        border-radius: 10px;
+        padding: 12px 18px;
+        background: #30478e;
+        color: white;
+        font-size: 15px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    button:hover {
+        background: #23366f;
+        transform: translateY(-2px);
+    }
+
+    .estadisticas {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .estadistica {
+        background: #eef2ff;
+        padding: 15px;
+        text-align: center;
+        border-radius: 12px;
+    }
+
+    .estadistica strong {
+        display: block;
+        font-size: 27px;
+        color: #30478e;
+        margin-top: 5px;
+    }
+
+    #listaPalabras {
+        list-style: none;
+        display: grid;
+        gap: 9px;
+    }
+
+    #listaPalabras li {
+        background: #f0f3fa;
+        padding: 11px 14px;
+        border-radius: 9px;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+
+    #listaPalabras li.encontrada {
+        text-decoration: line-through;
+        opacity: 0.45;
+        background: #dfe5ec;
+    }
+
+    .instrucciones {
+        background: #f5f7ff;
+        border-left: 5px solid #4059a8;
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 20px;
+        line-height: 1.6;
+    }
+
+    .mensaje {
+        text-align: center;
+        font-weight: bold;
+        min-height: 30px;
+        margin-top: 15px;
+        color: #30478e;
+    }
+
+    .victoria {
+        display: none;
+        text-align: center;
+        margin-top: 20px;
+        padding: 20px;
+        border-radius: 15px;
+        background: #e4f7e8;
+        border: 2px solid #55a868;
+    }
+
+    .victoria h2 {
+        color: #337a43;
+        margin-bottom: 8px;
+    }
+
+    footer {
+        text-align: center;
+        padding: 25px;
+        margin-top: 30px;
+        color: #596273;
+        font-size: 14px;
+    }
+
+    @media (max-width: 900px) {
+        .juego {
+            grid-template-columns: 1fr;
+        }
+
+        #sopa {
+            width: min(94vw, 650px);
+        }
+    }
+
+    @media (max-width: 500px) {
+        header h1 {
+            font-size: 24px;
+        }
+
+        header p {
+            font-size: 14px;
+        }
+
+        .panel-juego,
+        .panel-palabras,
+        .info {
+            padding: 17px;
+        }
+
+        #sopa {
+            border-width: 2px;
+        }
+
+        .celda {
+            font-size: 11px;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>Sopa de Letras: Políticas Educativas</h1> 
+</header>
+
+<div class="contenedor">
+
+    <section class="juego">
+
+        <div class="panel-juego">
+
+            <h2>Encuentra las palabras</h2>
+
+            <div id="sopa"></div>
+
+            <div class="controles">
+
+                <label for="color">
+                    Color para marcar:
+                </label>
+
+                <input
+                    type="color"
+                    id="color"
+                    value="#70d6ff"
+                >
+
+                <button onclick="reiniciarJuego()">
+                    Reiniciar juego
+                </button>
+
+            </div>
+
+            <div class="instrucciones">
+                <strong>¿Cómo jugar la sopa de letras?</strong><br>
+                Selecciona un color y después desliza el dedo sobre las letras
+                para formar una palabra.
+                Las palabras pueden aparecer horizontal, vertical o diagonalmente.
+            </div>
+
+            <div class="mensaje" id="mensaje"></div>
+
+            <div class="victoria" id="victoria">
+                <h2>¡Felicidades!</h2>
+                <p>Encontraste todos las palabras de la sopa de letras.</p>
+            </div>
+
+        </div>
+
+
+        <aside class="panel-palabras">
+
+            <h2>palabras a encontrar</h2>
+
+            <div class="estadisticas">
+
+                <div class="estadistica">
+                    Encontradas
+                    <strong id="encontradas">0</strong>
+                </div>
+
+                <div class="estadistica">
+                    Faltantes
+                    <strong id="faltantes">15</strong>
+                </div>
+
+            </div>
+
+            <ul id="listaPalabras"></ul>
+
+        </aside>
+
+    </section>
+
+</div>
+
+<footer>
+    Politica educativa
+</footer>
+
+
+<script>
+
+const TAMANO = 15;
+
+const palabras = [
+    "POLITICA",
+    "EDUCACION",
+    "CALIDAD",
+    "EQUIDAD",
+    "COBERTURA",
+    "EVALUACION",
+    "DOCENTES",
+    "REFORMA",
+    "RIEB",
+    "RIEMS",
+    "ALIANZA",
+    "TIC",
+    "UNESCO",
+    "OCDE",
+    "CALDERON"
+];
+
+let tablero = [];
+let posiciones = {};
+let encontradas = new Set();
+
+let seleccionando = false;
+let inicio = null;
+let seleccionActual = [];
+
+const sopa = document.getElementById("sopa");
+const colorPicker = document.getElementById("color");
+
+const direcciones = [
+    [0, 1],
+    [0, -1],
+    [1, 0],
+    [-1, 0],
+    [1, 1],
+    [1, -1],
+    [-1, 1],
+    [-1, -1]
+];
+
+
+function limpiarPalabra(palabra) {
+    return palabra
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toUpperCase();
+}
+
+
+function crearTableroVacio() {
+
+    tablero = [];
+
+    for (let fila = 0; fila < TAMANO; fila++) {
+
+        tablero[fila] = [];
+
+        for (let columna = 0; columna < TAMANO; columna++) {
+            tablero[fila][columna] = "";
+        }
+    }
+}
+
+
+function colocarPalabra(palabra) {
+
+    let intentos = 0;
+
+    while (intentos < 1000) {
+
+        intentos++;
+
+        const direccion =
+            direcciones[Math.floor(Math.random() * direcciones.length)];
+
+        const filaInicial =
+            Math.floor(Math.random() * TAMANO);
+
+        const columnaInicial =
+            Math.floor(Math.random() * TAMANO);
+
+        const filaFinal =
+            filaInicial + direccion[0] * (palabra.length - 1);
+
+        const columnaFinal =
+            columnaInicial + direccion[1] * (palabra.length - 1);
+
+        if (
+            filaFinal < 0 ||
+            filaFinal >= TAMANO ||
+            columnaFinal < 0 ||
+            columnaFinal >= TAMANO
+        ) {
+            continue;
+        }
+
+        let puedeColocar = true;
+
+        for (let i = 0; i < palabra.length; i++) {
+
+            const fila =
+                filaInicial + direccion[0] * i;
+
+            const columna =
+                columnaInicial + direccion[1] * i;
+
+            const actual = tablero[fila][columna];
+
+            if (actual !== "" && actual !== palabra[i]) {
+                puedeColocar = false;
+                break;
+            }
+        }
+
+        if (!puedeColocar) continue;
+
+        const coordenadas = [];
+
+        for (let i = 0; i < palabra.length; i++) {
+
+            const fila =
+                filaInicial + direccion[0] * i;
+
+            const columna =
+                columnaInicial + direccion[1] * i;
+
+            tablero[fila][columna] = palabra[i];
+
+            coordenadas.push(`${fila}-${columna}`);
+        }
+
+        posiciones[palabra] = coordenadas;
+
+        return true;
+    }
+
+    return false;
+}
+
+
+function rellenarTablero() {
+
+    const letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+    for (let fila = 0; fila < TAMANO; fila++) {
+
+        for (let columna = 0; columna < TAMANO; columna++) {
+
+            if (tablero[fila][columna] === "") {
+
+                tablero[fila][columna] =
+                    letras[Math.floor(Math.random() * letras.length)];
+            }
+        }
+    }
+}
+
+
+function construirSopa() {
+
+    sopa.innerHTML = "";
+
+    for (let fila = 0; fila < TAMANO; fila++) {
+
+        for (let columna = 0; columna < TAMANO; columna++) {
+
+            const celda = document.createElement("div");
+
+            celda.className = "celda";
+
+            celda.textContent = tablero[fila][columna];
+
+            celda.dataset.fila = fila;
+            celda.dataset.columna = columna;
+
+            celda.addEventListener("pointerdown", iniciarSeleccion);
+
+            celda.addEventListener("pointerenter", continuarSeleccion);
+
+            sopa.appendChild(celda);
+        }
+    }
+}
+
+
+function crearLista() {
+
+    const lista = document.getElementById("listaPalabras");
+
+    lista.innerHTML = "";
+
+    palabras.forEach(palabra => {
+
+        const li = document.createElement("li");
+
+        li.id = "palabra-" + palabra;
+
+        li.textContent = palabra;
+
+        lista.appendChild(li);
+    });
+}
+
+
+function obtenerCelda(fila, columna) {
+
+    return sopa.querySelector(
+        `.celda[data-fila="${fila}"][data-columna="${columna}"]`
+    );
+}
+
+
+function iniciarSeleccion(event) {
+
+    event.preventDefault();
+
+    seleccionando = true;
+
+    inicio = {
+        fila: Number(this.dataset.fila),
+        columna: Number(this.dataset.columna)
+    };
+
+    seleccionActual = [inicio];
+
+    this.classList.add("seleccionada");
+}
+
+
+function continuarSeleccion(event) {
+
+    if (!seleccionando) return;
+
+    const fila = Number(this.dataset.fila);
+    const columna = Number(this.dataset.columna);
+
+    const ultimo =
+        seleccionActual[seleccionActual.length - 1];
+
+    if (
+        ultimo.fila === fila &&
+        ultimo.columna === columna
+    ) {
+        return;
+    }
+
+    const df = Math.sign(fila - inicio.fila);
+    const dc = Math.sign(columna - inicio.columna);
+
+    const diferenciaFila =
+        Math.abs(fila - inicio.fila);
+
+    const diferenciaColumna =
+        Math.abs(columna - inicio.columna);
+
+    const esLinea =
+        fila === inicio.fila ||
+        columna === inicio.columna ||
+        diferenciaFila === diferenciaColumna;
+
+    if (!esLinea) return;
+
+    seleccionActual = [];
+
+    const pasos = Math.max(
+        diferenciaFila,
+        diferenciaColumna
+    );
+
+    for (let i = 0; i <= pasos; i++) {
+
+        const f = inicio.fila + df * i;
+        const c = inicio.columna + dc * i;
+
+        seleccionActual.push({
+            fila: f,
+            columna: c
+        });
+    }
+
+    document.querySelectorAll(".celda.seleccionada")
+        .forEach(celda => {
+            celda.classList.remove("seleccionada");
+        });
+
+    seleccionActual.forEach(posicion => {
+
+        const celda =
+            obtenerCelda(
+                posicion.fila,
+                posicion.columna
+            );
+
+        if (celda) {
+            celda.classList.add("seleccionada");
+        }
+    });
+}
+
+
+document.addEventListener("pointerup", terminarSeleccion);
+
+
+function terminarSeleccion() {
+
+    if (!seleccionando) return;
+
+    seleccionando = false;
+
+    if (seleccionActual.length < 2) {
+
+        limpiarSeleccionVisual();
+
+        return;
+    }
+
+    const palabra = seleccionActual
+        .map(posicion =>
+            tablero[posicion.fila][posicion.columna]
+        )
+        .join("");
+
+    const palabraInvertida =
+        palabra.split("").reverse().join("");
+
+    let encontrada = null;
+
+    palabras.forEach(p => {
+
+        const palabraLimpia =
+            limpiarPalabra(p);
+
+        if (
+            palabra === palabraLimpia ||
+            palabraInvertida === palabraLimpia
+        ) {
+            encontrada = palabraLimpia;
+        }
+    });
+
+    if (encontrada && !encontradas.has(encontrada)) {
+
+        marcarPalabra(encontrada);
+
+        mostrarMensaje(
+            "¡Palabra encontrada: " + encontrada + "!"
+        );
+
+    } else {
+
+        mostrarMensaje("Esa selección no corresponde a un concepto.");
+
+        limpiarSeleccionVisual();
+    }
+
+    seleccionActual = [];
+}
+
+
+function marcarPalabra(palabra) {
+
+    encontradas.add(palabra);
+
+    const color = colorPicker.value;
+
+    const coordenadas =
+        posiciones[palabra];
+
+    coordenadas.forEach(coordenada => {
+
+        const [fila, columna] =
+            coordenada.split("-").map(Number);
+
+        const celda =
+            obtenerCelda(fila, columna);
+
+        if (celda) {
+
+            celda.style.backgroundColor = color;
+            celda.style.color = "#111";
+            celda.classList.remove("seleccionada");
+        }
+    });
+
+    const elemento =
+        document.getElementById("palabra-" + palabra);
+
+    if (elemento) {
+        elemento.classList.add("encontrada");
+    }
+
+    actualizarContador();
+
+    if (encontradas.size === palabras.length) {
+
+        document.getElementById("victoria")
+            .style.display = "block";
+
+        mostrarMensaje(
+            "¡Excelente! Encontraste todos los conceptos."
+        );
+    }
+}
+
+
+function limpiarSeleccionVisual() {
+
+    document.querySelectorAll(".celda.seleccionada")
+        .forEach(celda => {
+
+            celda.classList.remove("seleccionada");
+
+        });
+}
+
+
+function actualizarContador() {
+
+    document.getElementById("encontradas")
+        .textContent = encontradas.size;
+
+    document.getElementById("faltantes")
+        .textContent = palabras.length - encontradas.size;
+}
+
+
+function mostrarMensaje(texto) {
+
+    const mensaje =
+        document.getElementById("mensaje");
+
+    mensaje.textContent = texto;
+
+    setTimeout(() => {
+
+        if (
+            mensaje.textContent === texto
+        ) {
+            mensaje.textContent = "";
+        }
+
+    }, 2200);
+}
+
+
+function generarJuego() {
+
+    crearTableroVacio();
+
+    posiciones = {};
+
+    encontradas = new Set();
+
+    document.getElementById("victoria")
+        .style.display = "none";
+
+    document.getElementById("mensaje")
+        .textContent = "";
+
+    const palabrasOrdenadas =
+        [...palabras]
+        .map(limpiarPalabra)
+        .sort((a, b) => b.length - a.length);
+
+    palabrasOrdenadas.forEach(palabra => {
+
+        colocarPalabra(palabra);
+
+    });
+
+    rellenarTablero();
+
+    construirSopa();
+
+    crearLista();
+
+    actualizarContador();
+}
+
+
+function reiniciarJuego() {
+
+    generarJuego();
+
+    mostrarMensaje(
+        "¡Juego reiniciado!"
+    );
+}
+
+
+generarJuego();
+
+</script>
+
+</body>
+</html>
